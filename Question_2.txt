@@ -1,0 +1,72 @@
+Q2
+
+Sub-part 1:
+
+Hive queries:
+
+set hive.cli.print.current.db=true;
+create database moduleEnd;
+
+create table customer                                                                                                     
+(cust_id int,
+ firstName string,                                                                                                         
+ lastName string,                                                                                                          
+ age int,
+ profession string) row format delimited fields terminated by ',' stored as textfile                                       
+ location 'user/bigcdac432550/exam/hive/Q1';
+
+load data local inpath 'custs.txt' overwrite into table customer;
+
+select profession, count(cust_id) from customer group by profession;
+
+--------------------------------------------------------------------------------------------------------
+
+Sub-part 2:
+
+Hive Queries:
+
+create table txn                                                                                                     
+(txn_id int,
+ txn_date string,                                                                                                         
+ cust_id int,                                                                                                          
+ amount double,
+ category string,
+ product string,
+ city string,
+ state string,
+ spendby string) row format delimited fields terminated by ',' stored as textfile                                       
+ location '/user/bigcdac432550/exam/hive/Q2';
+
+load data local inpath 'custs.txt' overwrite into table customer;
+
+select product, sum(amount) as sales from txn group by product order by sales desc limit 10;
+
+---------------------------------------------------------------------------------------------------------
+
+Sub-part 3:
+
+Hive Queries:
+
+set hive.exec.dynamic.partition.mode=nonstrict;                                                                           
+set hive.exec.dynamic.partition=true;
+
+create table txn_partition                                                                                                     
+(txn_id int,
+ txn_date string,                                                                                                         
+ cust_id int,                                                                                                          
+ amount double,
+ product string,
+ city string,
+ state string,
+ spendby string)
+ partitioned by (category string)
+ row format delimited fields terminated by ',' stored as textfile                                       
+ location '/user/bigcdac432550/exam/hive/txn_partition';
+
+insert overwrite table txn_partition partition(category)
+select txn.txn_id,txn.txn_date,txn.cust_id,txn.amount,                                                                    
+txn.product,txn.city,txn.state,txn.spendby,txn.category from txn distribute by category;
+
+show partitions txn_partition;
+
+----------------------------------------------------------------------------------------------------------

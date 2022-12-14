@@ -1,0 +1,19 @@
+from pyspark.sql.types import StructType, StringType, IntegerType, DoubleType, LongType
+
+schema = StructType().add("year",StringType(),True).add("quarter",StringType(),True).add("arps",StringType(),True).add("booked_seats",StringType(),True)
+
+df_with_schema = spark.read.format("csv").option("header, "True").schema(schema).load("hdfs://nameservice1/user/bigcdac432550/training/airlines.csv")
+
+df_with_schema.registerTempTable("airlines")
+
+Query1 = spark.sql("select year, c from (select year, sum(booked_seats) as c from airlines group by year order by c desc) air limit 1")
+
+Query1.show()
+
+Query2 = spark.sql("select year, c from (select year, sum(arps*booked_seats) as c from airlines group by year order by c desc) air limit 1")
+
+Query2.show()
+
+Query3 = spark.sql("select year, quarter, c from (select year, quarter, sum(arps*booked_seats) as c from airlines group by year,quarter order by c desc) air limit 1")
+
+Query3.show()
